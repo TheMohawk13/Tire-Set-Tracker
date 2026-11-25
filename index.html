@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tire Set Tracker</title>
+<meta name="theme-color" content="#1b1c1e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tire Set Tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#eceae5;--surface:#fbfaf8;--text:#1b1c1e;--muted:#66686c;--line:#d3d0c8;--accent:#1b1c1e;--accent-text:#fbfaf8;--danger:#b3261e;
+--dry:#f2c200;--wet:#2d7fd3;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181a;--surface:#222427;--text:#ecebe7;--muted:#9a9ca1;--line:#383b3f;--accent:#ecebe7;--accent-text:#17181a;--danger:#ff8a80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17181a;--surface:#222427;--text:#ecebe7;--muted:#9a9ca1;--line:#383b3f;--accent:#ecebe7;--accent-text:#17181a;--danger:#ff8a80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1,h2,.num{font-family:"Barlow Condensed","Arial Narrow",Roboto,system-ui,sans-serif;font-weight:700;letter-spacing:.01em}
+h1{font-size:2rem;margin:0 0 2px}
+h2{font-size:1.25rem;margin:0 0 10px}
+.sub{color:var(--muted);margin:0 0 14px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.seg button{display:flex;flex-direction:column;align-items:flex-start;min-height:56px;padding:8px 10px;text-align:left;background:var(--surface)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.seg small{opacity:.75;font-size:.8rem}
+.stats{display:grid;grid-template-columns:1.2fr 1.2fr .8fr;gap:8px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat .num{font-size:2rem;line-height:1}
+.stat span,.note{color:var(--muted);font-size:.85rem}
+.note.over{color:var(--danger)}
+.pips{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 4px}
+.pip{width:11px;height:11px;border-radius:50%;border:2px solid var(--line)}
+.pips.Dry .pip.on{background:var(--dry);border-color:var(--dry)}
+.pips.Wet .pip.on{background:var(--wet);border-color:var(--wet)}
+.pip.over{background:var(--danger);border-color:var(--danger)}
+section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
+input,select{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;min-height:44px}
+button{font:inherit;cursor:pointer;min-height:44px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);padding:0 14px}
+button.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);width:100%;font-weight:600}
+button.wide{width:100%;margin-top:8px}
+button.small{min-height:36px;padding:0 10px;font-size:.85rem}
+button.warn{color:var(--danger);border-color:var(--danger)}
+:focus-visible{outline:2px solid var(--wet);outline-offset:2px}
+.msg{color:var(--danger);font-size:.9rem;min-height:1.2em;margin:6px 0 0}
+.set{background:var(--surface);border:1px solid var(--line);border-left:10px solid var(--dry);border-radius:10px;padding:12px 12px 12px 14px;margin-bottom:10px}
+.set.Wet{border-left-color:var(--wet)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.name{font-size:1.5rem;line-height:1.1}
+.meta{color:var(--muted);font-size:.9rem}
+.laps{text-align:right}.laps .num{font-size:2.2rem;line-height:1}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:1px 9px;font-size:.8rem;margin-left:6px;vertical-align:middle}
+.chip.fresh{border-color:var(--muted);color:var(--muted)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.list li:last-child{border-bottom:none}
+.runs{margin-top:10px;border-top:1px solid var(--line)}
+.runs li:last-child{border-bottom:1px solid var(--line)}
+.runs button{min-height:32px;padding:0 8px;border:none;color:var(--muted)}
+.actions{margin-top:8px;text-align:right}
+.empty{color:var(--muted);padding:6px 0 14px;text-align:center}
+footer{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:.85rem}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;background:var(--bg);color:var(--text);cursor:pointer;animation:splashOut .4s ease 3s forwards}
+@keyframes splashOut{to{opacity:0;visibility:hidden}}
+@media (prefers-reduced-motion:reduce){#splash{animation-duration:.01s}}
+.wheel{width:170px;height:170px;margin-bottom:20px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.4))}
+.spin{transform-box:fill-box;transform-origin:50% 50%}
+@media (prefers-reduced-motion:no-preference){.spin{animation:wheelIn 2.6s cubic-bezier(.12,.7,.25,1) both}}
+@keyframes wheelIn{from{transform:rotate(-140deg)}to{transform:rotate(0)}}
+.sp-title{font-size:2.8rem;line-height:1}
+.sp-by{color:var(--muted);margin:10px 0 2px;font-size:.95rem}
+.sp-co{font-size:1.5rem;letter-spacing:.02em}
+.evbar{margin-bottom:12px}
+.evrow{display:flex;gap:8px;margin-bottom:8px}
+.evrow select,.evrow input{flex:1;min-width:0}
+.evrow button{flex:none}
+</style>
+</head>
+<body>
+<div id="splash">
+<svg class="wheel" viewBox="0 0 200 200" aria-hidden="true">
+<defs>
+<radialGradient id="tw-t" cx="50%" cy="50%" r="50%"><stop offset=".78" stop-color="#0b0c0d"/><stop offset=".83" stop-color="#1b1c1f"/><stop offset=".95" stop-color="#131416"/><stop offset="1" stop-color="#2e3034"/></radialGradient>
+<linearGradient id="tw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b5e64"/><stop offset=".5" stop-color="#34363a"/><stop offset="1" stop-color="#1c1d20"/></linearGradient>
+<radialGradient id="tw-d" cx="50%" cy="50%" r="50%"><stop offset=".45" stop-color="#6a6d73"/><stop offset=".8" stop-color="#9a9ea5"/><stop offset="1" stop-color="#7b7f86"/></radialGradient>
+<linearGradient id="tw-h" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<path id="tw-p" d="M15,100a85,85 0 1,1 170,0a85,85 0 1,1 -170,0"/>
+<path id="tw-k" d="M97.5,78h5l2.2-54q-4.7-2.4-9.4,0z" fill="url(#tw-g)" stroke="#6d7076" stroke-width=".5"/>
+</defs>
+<circle cx="100" cy="100" r="97" fill="url(#tw-t)" stroke="#3b3e43" stroke-width="1.5"/>
+<g class="spin">
+<circle cx="100" cy="100" r="94.5" fill="none" stroke="#08090a" stroke-width="3" stroke-dasharray="2.2 2.2" opacity=".7"/>
+<circle cx="100" cy="100" r="91" fill="none" stroke="#2a2c30" stroke-width=".8"/>
+<circle cx="100" cy="100" r="82" fill="none" stroke="#26282b" stroke-width=".8"/>
+<text font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-size="7" font-weight="700" letter-spacing="2.4" fill="#cfd2d7" opacity=".75"><textPath href="#tw-p" startOffset="25%" text-anchor="middle">TIRE SET TRACKER</textPath></text>
+<circle cx="100" cy="100" r="78" fill="#0b0c0d" stroke="#6b6f75" stroke-width="1.2"/>
+<circle cx="100" cy="100" r="73" fill="none" stroke="url(#tw-g)" stroke-width="5"/>
+<circle cx="100" cy="100" r="60" fill="url(#tw-d)"/>
+<circle cx="100" cy="100" r="54" fill="none" stroke="#2a2c30" stroke-width="8" stroke-dasharray="3.2 3" opacity=".85"/>
+<circle cx="100" cy="100" r="31" fill="#1d1f22"/>
+<use href="#tw-k"/><use href="#tw-k" transform="rotate(36 100 100)"/><use href="#tw-k" transform="rotate(72 100 100)"/><use href="#tw-k" transform="rotate(108 100 100)"/><use href="#tw-k" transform="rotate(144 100 100)"/><use href="#tw-k" transform="rotate(180 100 100)"/><use href="#tw-k" transform="rotate(216 100 100)"/><use href="#tw-k" transform="rotate(252 100 100)"/><use href="#tw-k" transform="rotate(288 100 100)"/><use href="#tw-k" transform="rotate(324 100 100)"/>
+<circle cx="100" cy="100" r="24" fill="url(#tw-g)" stroke="#6d7076" stroke-width=".6"/>
+<circle cx="100" cy="85" r="3" fill="#b8902a" stroke="#2a2c30" stroke-width=".8"/><circle cx="114.26" cy="95.36" r="3" fill="#b8902a" stroke="#2a2c30" stroke-width=".8"/><circle cx="108.82" cy="112.14" r="3" fill="#b8902a" stroke="#2a2c30" stroke-width=".8"/><circle cx="91.18" cy="112.14" r="3" fill="#b8902a" stroke="#2a2c30" stroke-width=".8"/><circle cx="85.74" cy="95.36" r="3" fill="#b8902a" stroke="#2a2c30" stroke-width=".8"/>
+<circle cx="100" cy="100" r="7" fill="#17181a" stroke="#5d6066" stroke-width="1"/>
+</g>
+<circle cx="100" cy="100" r="97" fill="url(#tw-h)"/>
+</svg>
+<div class="sp-title num">Tire Set Tracker</div>
+<div class="sp-by">created by</div>
+<div class="sp-co num">Ryne Hoover Transportation</div>
+</div>
+<main>
+<h1>Tire sets</h1>
+<p class="sub">Track dry and wet sets against your allocation.</p>
+
+<div class="evbar">
+<label for="evSel">Saved events</label>
+<div class="evrow"><select id="evSel"></select><button class="small" id="evNew">New event</button></div>
+<div class="evrow"><input id="evName" maxlength="40" placeholder="Event name, e.g. Road America" aria-label="Event name" autocomplete="off"><button class="small warn" id="evDel">Delete event</button></div>
+<label for="evDate">Event date (optional)</label>
+<div class="evrow"><input type="date" id="evDate"><button class="small" id="evNoDate">No date</button></div>
+</div>
+
+<div class="seg" role="group" aria-label="Event type">
+<button data-ev="standard"><strong>Standard</strong><small>5 dry, 3 wet</small></button>
+<button data-ev="endurance"><strong>Endurance</strong><small>7 dry, 5 wet</small></button>
+<button data-ev="test"><strong>Test</strong><small>No limit</small></button>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="num" id="DryN"></div><span>Dry used</span><div class="pips Dry" id="DryP"></div><div class="note" id="DryNote"></div></div>
+<div class="stat"><div class="num" id="WetN"></div><span>Wet used</span><div class="pips Wet" id="WetP"></div><div class="note" id="WetNote"></div></div>
+<div class="stat"><div class="num" id="sLaps">0</div><span>Weekend laps</span></div>
+</div>
+
+<section>
+<h2>Log a run</h2>
+<div class="row">
+<div><label for="rSet">Tire set</label><select id="rSet"></select></div>
+<div><label for="rSes">Session</label><select id="rSes"></select></div>
+</div>
+<label for="rLaps">Laps</label>
+<input id="rLaps" type="number" inputmode="numeric" min="1" placeholder="e.g. 8" style="margin-bottom:8px">
+<button class="primary" id="addRun">Log run</button>
+<p class="msg" id="runMsg"></p>
+</section>
+
+<div id="sets"></div>
+
+<section id="bySes" style="display:none">
+<h2>By session</h2>
+<ul class="list" id="sesList"></ul>
+</section>
+
+<section>
+<h2>Add a tire set</h2>
+<div class="row">
+<div><label for="aName">Set name</label><input id="aName" maxlength="12" placeholder="e.g. D1" autocomplete="off"></div>
+<div><label for="aType">Type</label><select id="aType"><option>Dry</option><option>Wet</option></select></div>
+</div>
+<label for="aPrior">Laps already on it (from a previous event)</label>
+<input id="aPrior" type="number" inputmode="numeric" min="0" value="0" style="margin-bottom:8px">
+<button class="primary" id="addSet">Add set</button>
+<button class="wide" id="fillBtn" data-act="fill"></button>
+<p class="msg" id="addMsg"></p>
+</section>
+
+<footer>
+<span>Saved on this device only, so people you share the link with start fresh and can’t see your data. Clearing your browser data erases it.</span>
+<button class="small warn" id="reset">Clear this event</button>
+</footer>
+</main>
+
+<script>
+var KEY = 'tireTracker.v2';
+var SESSIONS = ['Practice 1', 'Practice 2', 'Qualifying', 'Race'];
+var TYPES = ['Dry', 'Wet'];
+var LIMITS = { standard: { Dry: 5, Wet: 3 }, endurance: { Dry: 7, Wet: 5 }, test: { Dry: null, Wet: null } };
+var OLD = { FP1: 'Practice 1', FP2: 'Practice 2', FP3: 'Practice 2', Sprint: 'Race' };
+var state = { event: 'standard', sets: [], all: { standard: [], endurance: [], test: [] } };
+var pending = null;
+
+try {
+  var raw = localStorage.getItem(KEY) || localStorage.getItem('tireTracker.v1');
+  if (raw) {
+    var p = JSON.parse(raw);
+    if (p && p.all) {
+      Object.keys(state.all).forEach(function (k) { if (Array.isArray(p.all[k])) state.all[k] = p.all[k]; });
+      if (LIMITS[p.event]) state.event = p.event;
+    } else if (p && Array.isArray(p.sets)) {
+      p.sets.forEach(function (s) {
+        if (!s.type) s.type = (s.compound === 'Wet' || s.compound === 'Inter') ? 'Wet' : 'Dry';
+        s.runs.forEach(function (r) {
+          r.session = OLD[r.session] || r.session;
+          if (SESSIONS.indexOf(r.session) < 0) r.session = 'Race';
+        });
+      });
+      state.all[LIMITS[p.event] ? p.event : 'standard'] = p.sets;
+      if (LIMITS[p.event]) state.event = p.event;
+    }
+  }
+} catch (e) {}
+
+var NAMES = { standard: 'Standard weekend', endurance: 'Endurance event', test: 'Test' };
+var store = { events: [], current: null };
+try {
+  var r3 = localStorage.getItem('tireTracker.v3');
+  if (r3) {
+    var s3 = JSON.parse(r3);
+    if (s3 && Array.isArray(s3.events)) {
+      s3.events.forEach(function (ev) {
+        if (!LIMITS[ev.event]) ev.event = 'standard';
+        if (!Array.isArray(ev.sets)) ev.sets = [];
+      });
+      store = s3;
+    }
+  }
+} catch (e) {}
+if (!store.events.length) {
+  Object.keys(state.all).forEach(function (k) {
+    if (state.all[k].length) store.events.push({ id: uid(), name: NAMES[k], event: k, sets: state.all[k] });
+  });
+  if (!store.events.length) store.events.push({ id: uid(), name: 'Event 1', event: 'standard', created: Date.now(), sets: [] });
+  store.current = (store.events.filter(function (ev) { return ev.event === state.event; })[0] || store.events[0]).id;
+}
+state = store.events.filter(function (ev) { return ev.id === store.current; })[0] || store.events[0];
+function save() { store.current = state.id; try { localStorage.setItem('tireTracker.v3', JSON.stringify(store)); } catch (e) {} }
+function $(id) { return document.getElementById(id); }
+function uid() { return Math.random().toString(36).slice(2, 9); }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function laps(s) { return s.runs.reduce(function (n, r) { return n + r.laps; }, 0); }
+function ofType(t) { return state.sets.filter(function (s) { return s.type === t; }); }
+function opts(arr) { return arr.map(function (a) { return '<option>' + esc(a) + '</option>'; }).join(''); }
+
+$('rSes').innerHTML = opts(SESSIONS);
+
+function render() {
+  $('evSel').innerHTML = store.events.map(function (ev) {
+    return '<option value="' + ev.id + '">' + esc(ev.name) + (ev.date ? ' · ' + fmtDate(ev.date) : '') + '</option>';
+  }).join('');
+  $('evSel').value = state.id;
+  if (document.activeElement !== $('evName')) $('evName').value = state.name;
+  if (document.activeElement !== $('evDate')) $('evDate').value = state.date || '';
+  $('evDel').textContent = pending === 'ev' ? 'Tap again to delete' : 'Delete event';
+  var lim = LIMITS[state.event];
+  document.querySelectorAll('[data-ev]').forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.ev === state.event);
+  });
+
+  var missing = [];
+  TYPES.forEach(function (t) {
+    var used = ofType(t).filter(function (s) { return s.runs.length; }).length;
+    if (lim[t] === null) {
+      var cnt = ofType(t).length, dots = '';
+      for (var j = 0; j < used; j++) dots += '<span class="pip on"></span>';
+      $(t + 'N').textContent = used;
+      $(t + 'P').innerHTML = dots;
+      $(t + 'Note').className = 'note';
+      $(t + 'Note').textContent = cnt + (cnt === 1 ? ' set' : ' sets') + ' added';
+      return;
+    }
+    var gap = Math.max(0, lim[t] - ofType(t).length);
+    if (gap) missing.push(gap + ' ' + t.toLowerCase());
+    $(t + 'N').textContent = used + '/' + lim[t];
+    var pips = '';
+    for (var i = 0; i < Math.max(lim[t], used); i++) {
+      pips += '<span class="pip' + (i < used ? (i >= lim[t] ? ' over' : ' on') : '') + '"></span>';
+    }
+    $(t + 'P').innerHTML = pips;
+    var note = $(t + 'Note');
+    note.className = 'note' + (used > lim[t] ? ' over' : '');
+    note.textContent = used > lim[t] ? (used - lim[t]) + ' over limit' : (lim[t] - used ? (lim[t] - used) + ' left' : 'none left');
+  });
+  $('sLaps').textContent = state.sets.reduce(function (n, s) { return n + laps(s); }, 0);
+
+  $('fillBtn').style.display = missing.length ? '' : 'none';
+  $('fillBtn').textContent = 'Add all missing sets (' + missing.join(', ') + ')';
+  $('reset').textContent = pending === 'all' ? 'Tap again to clear' : 'Clear this event';
+
+  var sel = $('rSet').value;
+  $('rSet').innerHTML = state.sets.length
+    ? state.sets.map(function (s) { return '<option value="' + s.id + '">' + esc(s.name) + ' (' + s.type + ')</option>'; }).join('')
+    : '<option value="">No sets yet</option>';
+  if (sel && state.sets.some(function (s) { return s.id === sel; })) $('rSet').value = sel;
+
+  $('bySes').style.display = state.sets.length ? '' : 'none';
+  $('sesList').innerHTML = SESSIONS.map(function (ses) {
+    var names = [], n = 0;
+    state.sets.forEach(function (s) {
+      var rs = s.runs.filter(function (r) { return r.session === ses; });
+      if (rs.length) { names.push(esc(s.name)); n += rs.reduce(function (a, r) { return a + r.laps; }, 0); }
+    });
+    return '<li><span>' + ses + '</span><span>' + (names.length ? names.join(', ') + ' · ' + n + (n === 1 ? ' lap' : ' laps') : '—') + '</span></li>';
+  }).join('');
+
+  if (!state.sets.length) {
+    $('sets').innerHTML = '<div class="empty">No tire sets yet. Add them below to start logging runs.</div>';
+    return;
+  }
+  $('sets').innerHTML = state.sets.map(function (s) {
+    var runs = s.runs.map(function (r) {
+      return '<li><span>' + esc(r.session) + ' · ' + r.laps + (r.laps === 1 ? ' lap' : ' laps') +
+        '</span><button data-act="run" data-set="' + s.id + '" data-run="' + r.id + '" aria-label="Remove run">Remove</button></li>';
+    }).join('');
+    var chip = s.runs.length ? '<span class="chip">Used</span>' : '<span class="chip fresh">' + (s.prior ? 'Not run yet' : 'Unused') + '</span>';
+    return '<div class="set ' + s.type + '"><div class="top"><div><div class="name num">' + esc(s.name) + chip + '</div>' +
+      '<div class="meta">' + s.type + (s.prior ? ', ' + s.prior + ' laps from a previous event' : '') + '</div></div>' +
+      '<div class="laps"><div class="num">' + (laps(s) + (s.prior || 0)) + '</div><div class="meta">laps total</div></div></div>' +
+      (runs ? '<ul class="list runs">' + runs + '</ul>' : '') +
+      '<div class="actions"><button class="small warn" data-act="set" data-set="' + s.id + '">' +
+      (pending === s.id ? 'Tap again to delete' : 'Delete set') + '</button></div></div>';
+  }).join('');
+}
+
+function fmtDate(d) {
+  var p = String(d).split('-');
+  return p.length === 3 ? new Date(p[0], p[1] - 1, p[2]).toLocaleDateString() : '';
+}
+
+function arm(key) {
+  pending = key; render();
+  setTimeout(function () { if (pending === key) { pending = null; render(); } }, 3000);
+}
+
+function nextName(t) {
+  var n = 1;
+  while (state.sets.some(function (s) { return s.name.toLowerCase() === (t[0] + n).toLowerCase(); })) n++;
+  return t[0] + n;
+}
+
+document.querySelector('.seg').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  state.event = b.dataset.ev; pending = null; save(); render();
+};
+
+$('addSet').onclick = function () {
+  var name = $('aName').value.trim(), t = $('aType').value, lim = LIMITS[state.event][t];
+  if (!name) { $('addMsg').textContent = 'Enter a name for this set.'; return; }
+  if (state.sets.some(function (s) { return s.name.toLowerCase() === name.toLowerCase(); })) {
+    $('addMsg').textContent = 'A set with that name already exists.'; return;
+  }
+  if (lim !== null && ofType(t).length >= lim) {
+    $('addMsg').textContent = 'You already have ' + lim + ' ' + t.toLowerCase() + ' sets for this event.'; return;
+  }
+  $('addMsg').textContent = '';
+  state.sets.push({ id: uid(), name: name, type: t, prior: Math.max(0, parseInt($('aPrior').value, 10) || 0), runs: [] });
+  $('aName').value = ''; $('aPrior').value = '0'; save(); render();
+};
+
+$('fillBtn').onclick = function () {
+  TYPES.forEach(function (t) {
+    while (ofType(t).length < LIMITS[state.event][t]) {
+      state.sets.push({ id: uid(), name: nextName(t), type: t, runs: [] });
+    }
+  });
+  $('addMsg').textContent = ''; save(); render();
+};
+
+$('addRun').onclick = function () {
+  var s = state.sets.filter(function (x) { return x.id === $('rSet').value; })[0];
+  var n = parseInt($('rLaps').value, 10);
+  if (!s) { $('runMsg').textContent = 'Add a tire set first.'; return; }
+  if (!(n > 0)) { $('runMsg').textContent = 'Enter the number of laps (1 or more).'; return; }
+  $('runMsg').textContent = '';
+  s.runs.push({ id: uid(), session: $('rSes').value, laps: n });
+  $('rLaps').value = ''; save(); render();
+};
+
+$('sets').onclick = function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  var s = state.sets.filter(function (x) { return x.id === b.dataset.set; })[0];
+  if (!s) return;
+  if (b.dataset.act === 'run') {
+    s.runs = s.runs.filter(function (r) { return r.id !== b.dataset.run; });
+    save(); render();
+  } else if (pending === s.id) {
+    state.sets = state.sets.filter(function (x) { return x.id !== s.id; });
+    pending = null; save(); render();
+  } else { arm(s.id); }
+};
+
+$('reset').onclick = function () {
+  if (pending === 'all') { state.sets = []; pending = null; save(); render(); }
+  else arm('all');
+};
+
+$('evSel').onchange = function () {
+  state = store.events.filter(function (ev) { return ev.id === $('evSel').value; })[0] || state;
+  pending = null; save(); render();
+};
+
+$('evNew').onclick = function () {
+  var ev = { id: uid(), name: 'Event ' + (store.events.length + 1), event: 'standard', date: '', sets: [] };
+  store.events.push(ev); state = ev; pending = null; save(); render();
+  $('evName').focus(); $('evName').select();
+};
+
+$('evName').onchange = function () {
+  state.name = $('evName').value.trim() || 'Untitled event'; save(); render();
+};
+
+$('evDate').onchange = function () { state.date = $('evDate').value; save(); render(); };
+
+$('evNoDate').onclick = function () { state.date = ''; save(); render(); };
+
+$('evDel').onclick = function () {
+  if (pending !== 'ev') { arm('ev'); return; }
+  store.events = store.events.filter(function (ev) { return ev.id !== state.id; });
+  if (!store.events.length) store.events.push({ id: uid(), name: 'Event 1', event: 'standard', created: Date.now(), sets: [] });
+  state = store.events[store.events.length - 1]; pending = null; save(); render();
+};
+
+$('splash').onclick = function () { this.style.display = 'none'; };
+
+render();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
