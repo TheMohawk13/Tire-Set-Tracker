@@ -17,11 +17,12 @@ After that it opens like an app and works without a signal.
 ## Quick start
 
 1. **Create an event.** At the top, tap **New event**, type a name (for example "Road America"), and optionally pick the event date. **No date** clears it.
-2. **Pick the event type.** Choose **Standard** (5 dry, 3 wet), **Endurance** (7 dry, 5 wet), or **Test** (no limit). The counters at the top follow the type you pick.
+2. **Pick the event type.** Choose **IMSA Standard** (5 dry, 3 wet), **IMSA Endurance** (7 dry, 5 wet), **SRO** (6 dry, unlimited wet) or **Test** (no limit). The counters at the top follow the type you pick.
+   - **SRO bronze test:** if you are in the bronze test at the event, tick **Bronze test at this event** to allow a 7th dry set. Wet sets have no limit, so the wet counter just counts the sets you have used. The tick is saved with the event.
 3. **Add your tire sets.** In the **Add a tire set** section, either:
    - tap **Add all missing sets** to create the full allocation at once (D1 to D5 and W1 to W3 for a standard weekend), or
    - add sets one at a time with a name, type (Dry or Wet) and **Laps already on it** for a set carried over from a previous event or test. Leave it at 0 for new tires.
-4. **Log runs.** In **Log a run**, choose the tire set, the session (Practice 1, Practice 2, Qualifying or Race), enter the laps, and tap **Log run**. You can log the same set in more than one session.
+4. **Log runs.** In **Log a run**, choose the tire set and the session, enter the laps, and tap **Log run**. You can log the same set in more than one session.
 5. **Check the board.** The Dry and Wet counters show how many sets you have used out of your allocation, with a dot for each. Each set card shows its total laps (including laps from before the weekend) and whether it is Unused, Not run yet, or Used. **By session** lists which sets ran in each session and how many laps.
 
 ## Fixing mistakes
@@ -29,6 +30,7 @@ After that it opens like an app and works without a signal.
 - **Remove a run:** tap **Remove** next to it on the set card.
 - **Delete a set or an event:** tap the delete button, then tap it again to confirm. If you don't tap again within a few seconds, it cancels.
 - **Start an event over:** **Clear this event** (bottom of the page) removes all of its sets and runs. It asks for a second tap too.
+- **Change the sessions:** under **Log a run**, open **Edit sessions** to add sessions (for example "Practice 5") or remove ones you don't need. A session that already has runs can't be removed. New events start with a list that depends on the type (IMSA Standard, IMSA Endurance, SRO or Test), and you can change it.
 - **Skip the opening screen:** tap anywhere on it.
 
 ## Past events
@@ -41,4 +43,4 @@ Everything is saved on **your own device only**. Other people who open the link 
 
 ## Updating the site (for the site owner)
 
-Upload the changed files to the repository, then raise the version number in `sw.js` (for example from `tire-tracker-v6` to `tire-tracker-v7`) so phones pick up the new version. iPhones save the home screen icon when it is added, so delete the old shortcut and add it again to see a new icon.
+Upload the changed files to the repository, then raise the version number in `sw.js` (for example from `tire-tracker-v8` to `tire-tracker-v9`) so phones pick up the new version. iPhones save the home screen icon when it is added, so delete the old shortcut and add it again to see a new icon.
