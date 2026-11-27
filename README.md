@@ -41,10 +41,6 @@ Every event is saved. Use the **Saved events** menu at the top to switch between
 
 Everything is saved on **your own device only**. Other people who open the link start with a blank copy and can't see your data, and you can't see theirs. Clearing your browser's website data erases it, and a different phone or browser will not have your events.
 
-## Updating the site (for the site owner)
-
-Upload the changed files to the repository, then raise the version number in `sw.js` (for example from `tire-tracker-v10` to `tire-tracker-v11`) so phones pick up the new version. iPhones save the home screen icon when it is added, so delete the old shortcut and add it again to see a new icon.
-
 ---
 
 © 2026 Ryne Hoover Transportation. All rights reserved. Free to use at the link above; copying, modifying or reselling the code requires written permission.
