@@ -43,4 +43,8 @@ Everything is saved on **your own device only**. Other people who open the link 
 
 ## Updating the site (for the site owner)
 
-Upload the changed files to the repository, then raise the version number in `sw.js` (for example from `tire-tracker-v8` to `tire-tracker-v9`) so phones pick up the new version. iPhones save the home screen icon when it is added, so delete the old shortcut and add it again to see a new icon.
+Upload the changed files to the repository, then raise the version number in `sw.js` (for example from `tire-tracker-v10` to `tire-tracker-v11`) so phones pick up the new version. iPhones save the home screen icon when it is added, so delete the old shortcut and add it again to see a new icon.
+
+---
+
+© 2026 Ryne Hoover Transportation. All rights reserved. Free to use at the link above; copying, modifying or reselling the code requires written permission.
