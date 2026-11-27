@@ -2,7 +2,7 @@
 
 Keep track of every tire set you use across a race weekend: how many dry and wet sets you have left, which sessions each set ran in, and how many laps are on it.
 
-**Open it:** https://themohawk13.github.io/tire-set-tracker
+**Open it:** https://themohawk13.github.io/Tire-Set-Tracker/
 
 Created by Ryne Hoover Transportation.
 
